@@ -39,9 +39,9 @@ begin
   ReadFile(hFile, buf, 1, dwread, nil);
   while (dwread > 0) do
   begin
-    if buf[0] <> #10 then
+    if buf[0] <> #13 then // Note: The first line of SFV files contains a comment ended with LF while the other lines end with CR-LF
     begin
-      if buf[0] = #13 then exit;
+      if buf[0] = #10 then exit;
       s := s + string(buf[0]);
     end;
     Readfile(hFile, buf, 1, dwread, nil);
