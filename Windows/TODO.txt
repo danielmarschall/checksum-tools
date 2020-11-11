@@ -1,0 +1,8 @@
+
+Button to select directory
+
+Button to convert drive letter (X:\) into long file name UNC path (\\?\)
+
+Pause/Cancel button
+
+*Maybe* in the future a SFV/MD5 generator. However, TotalCommander can do it too.
