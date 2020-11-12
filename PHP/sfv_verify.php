@@ -17,6 +17,8 @@
    limitations under the License.
 */
 
+// TODO: make use of STDERR and return different exit codes
+
 function testsfv($file) {
 	// TODO: warn if an entry is multiple times (with different checksums) in a single file
 	if (!file_exists($file)) {
@@ -25,8 +27,18 @@ function testsfv($file) {
 	}
 
 	$lines = file($file);
+	$is_first_line = true;
+	$force_utf8 = false;
 	foreach ($lines as $line) {
-		$line = str_replace("\xEF\xBB\xBF",'',$line);
+		if ($is_first_line) {
+			$tmp = 0;
+			$line = str_replace("\xEF\xBB\xBF",'',$line,$tmp);
+			if ($tmp > 0) $force_utf8 = true;
+			$is_first_line = false;
+		}
+		$is_ansi = strstr(utf8_decode($line),'?') !== false; // Attention: This assumes that '?' is not part of the line!
+		if (!$force_utf8 && $is_ansi) $line = utf8_encode($line);
+
 		$line = rtrim($line);
 		if ($line == '') continue;
 		$checksum = substr($line,-8);
@@ -39,7 +51,8 @@ function testsfv($file) {
 			if (strtolower($checksum) != strtolower($checksum2)) {
 				echo "CHECKSUM FAIL: $origname (expected $checksum, but is $checksum2)\n";
 			} else {
-				//echo "OK: $origname\n";
+				global $show_verbose;
+				if ($show_verbose) echo "OK: $origname\n";
 			}
 		}
 		// TODO: Also warn about extra files which are not indexed
@@ -61,23 +74,33 @@ function crc32_file($filename, $rawOutput = false) {
 }
 
 function _rec($directory) {
+	$directory = rtrim($directory, '/\\');
+
 	if (!is_dir($directory)) {
 		exit("Invalid directory path $directory\n");
 	}
 
 	if ($dont_add_files = count(glob("$directory/*.sfv")) == 0) {
-		// echo "Directory $directory has no SFV file. Skipping.\n";
+		global $show_verbose;
+		if ($show_verbose) echo "Directory $directory has no SFV file. Skipping.\n";
 	} else {
 		$out = array();
 
-		// echo "Check $directory\n";
-		$sfvfiles = glob('*.sfv');
+		global $show_verbose;
+		if ($show_verbose) echo "Check directory $directory\n";
+		$sfvfiles = glob($directory.'/*.sfv');
 		foreach ($sfvfiles as $sfvfile) {
 			testsfv($sfvfile);
 		}
 	}
 
-	foreach (scandir($directory) as $file) {
+	$sd = @scandir($directory);
+	if ($sd === false) {
+		echo "Error: Cannot scan directory $directory\n";
+		return;
+	}
+
+	foreach ($sd as $file) {
 		if ($file !== '.' && $file !== '..') {
 			$file = $directory . '/' . $file;
 			if (is_dir($file)) {
@@ -90,16 +113,27 @@ function _rec($directory) {
 
 # ---
 
-if ($argc != 2) {
-	echo "Syntax: $argv[0] <directory>\n";
+$show_verbose = false;
+$dir = '';
+
+for ($i=1; $i<$argc; $i++) {
+	if ($argv[$i] == '-v') {
+		$show_verbose = true;
+	} else {
+		$dir = $argv[$i];
+	}
+}
+
+if (empty($dir)) {
+	echo "Syntax: $argv[0] [-v] <directory>\n";
 	exit(2);
 }
 
-if (!is_dir($argv[1])) {
+if (!is_dir($dir)) {
 	echo "Directory not found\n";
 	exit(1);
 }
 
-_rec($argv[1]);
+_rec($dir);
 
-echo "Done.\n";
+if ($show_verbose) echo "Done.\n";

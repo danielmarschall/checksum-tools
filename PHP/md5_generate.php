@@ -20,6 +20,8 @@
 // This script generates MD5 files
 // If there is already an MD5 file existing, only new files get appended to the existing MD5 files.
 
+// TODO: make use of STDERR and return different exit codes
+
 function _rec($directory) {
 	if (!is_dir($directory)) {
 		die("Invalid directory path $directory\n");
@@ -44,7 +46,8 @@ function _rec($directory) {
 		if (is_dir($fullpath)) {
 			_rec($fullpath);
 		} else {
-###			echo "$fullpath\n";
+			global $show_verbose;
+			if ($show_verbose) echo "$fullpath\n";
 			$dir = pathinfo($fullpath, PATHINFO_DIRNAME);
 
 			if (!file_exists($md5_file)) {
@@ -79,16 +82,27 @@ function md5_get_files($filename) {
 
 # ---
 
-if ($argc != 2) {
-	echo "Syntax: $argv[0] <directory>\n";
+$show_verbose = false;
+$dir = '';
+
+for ($i=1; $i<$argc; $i++) {
+	if ($argv[$i] == '-v') {
+		$show_verbose = true;
+	} else {
+		$dir = $argv[$i];
+	}
+}
+
+if (empty($dir)) {
+	echo "Syntax: $argv[0] [-v] <directory>\n";
 	exit(2);
 }
 
-if (!is_dir($argv[1])) {
+if (!is_dir($dir)) {
 	echo "Directory not found\n";
 	exit(1);
 }
 
-_rec($argv[1]);
+_rec($dir);
 
-echo "Done.\n";
+if ($show_verbose) echo "Done.\n";
