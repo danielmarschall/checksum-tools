@@ -35,17 +35,23 @@ function _rec($directory) {
 		$existing_files = array();
 	}
 
-	foreach (scandir($directory) as $file) {
+	$sd = @scandir($directory);
+	if ($sd === false) {
+		echo "Error: Cannot scan directory $directory\n";
+		return;
+	}
+
+	foreach ($sd as $file) {
 		if ($file === '.') continue;
 		if ($file === '..') continue;
 		if (strtolower($file) === 'thumbs.db') continue;
-		if (substr($file, -4) === '.md5') continue;
-		if (substr($file, -4) === '.sfv') continue;
+		if (strtolower(substr($file, -4)) === '.md5') continue;
+		if (strtolower(substr($file, -4)) === '.sfv') continue;
 
 		$fullpath = $directory . '/' . $file;
 		if (is_dir($fullpath)) {
 			_rec($fullpath);
-		} else {
+		} else if (is_file($fullpath)) {
 			global $show_verbose;
 			if ($show_verbose) echo "$fullpath\n";
 			$dir = pathinfo($fullpath, PATHINFO_DIRNAME);
@@ -58,6 +64,9 @@ function _rec($directory) {
 				$md5 = strtolower(md5_file($fullpath));
 				file_put_contents($md5_file, "$md5 *$file\r\n", FILE_APPEND);
 			}
+		} else {
+			// For some reason, some files on a NTFS volume are "FIFO" pipe files?!
+			echo "Warning: $fullpath is not a regular file!\n";
 		}
 	}
 }

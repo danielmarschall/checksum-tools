@@ -18,6 +18,23 @@
 */
 
 // TODO: make use of STDERR and return different exit codes
+// TODO: On Windows file systems, accept file names case insensitively
+
+function utf8_normalize($str) {
+	// This helps to handle decomposite Unicode endpoints (E.g. German Umlauts have different representations)
+	// Requires php-intl
+	if (!class_exists('Normalizer')) return $str;
+	return Normalizer::normalize($str);
+}
+
+function convertToUTF8($str) {
+	$enc = mb_detect_encoding($str);
+	if ($enc && $enc != 'UTF-8') {
+		return iconv($enc, 'UTF-8', $str);
+	} else {
+		return $str;
+	}
+}
 
 function testsfv($file) {
 	// TODO: warn if an entry is multiple times (with different checksums) in a single file
@@ -25,6 +42,8 @@ function testsfv($file) {
 		echo "ERROR: File $file does not exist.\n";
 		return;
 	}
+
+	$files_checked = array();
 
 	$lines = file($file);
 	$is_first_line = true;
@@ -36,26 +55,56 @@ function testsfv($file) {
 			if ($tmp > 0) $force_utf8 = true;
 			$is_first_line = false;
 		}
-		$is_ansi = strstr(utf8_decode($line),'?') !== false; // Attention: This assumes that '?' is not part of the line!
-		if (!$force_utf8 && $is_ansi) $line = utf8_encode($line);
+		if (!$force_utf8) $line = convertToUTF8($line);
+
+		if (substr(trim($line),0,1) == ';') continue;
 
 		$line = rtrim($line);
 		if ($line == '') continue;
 		$checksum = substr($line,-8);
 		$origname = rtrim(substr($line,0,strlen($line)-8));
-		$origname = dirname($file) . '/' . trim($origname);
+		$origname = dirname($file) . '/' . rtrim($origname);
 		if (!file_exists($origname)) {
 			echo "WARNING: File vanished : $origname\n";
 		} else {
-			$checksum2 = crc32_file($origname);
-			if (strtolower($checksum) != strtolower($checksum2)) {
-				echo "CHECKSUM FAIL: $origname (expected $checksum, but is $checksum2)\n";
+			if (is_file($origname)) {
+				$checksum2 = crc32_file($origname);
+				if (strtolower($checksum) != strtolower($checksum2)) {
+					echo "CHECKSUM FAIL: $origname (expected $checksum, but is $checksum2)\n";
+				} else {
+					global $show_verbose;
+					if ($show_verbose) echo "OK: $origname\n";
+				}
 			} else {
-				global $show_verbose;
-				if ($show_verbose) echo "OK: $origname\n";
+				// For some reason, some files on a NTFS volume are "FIFO" pipe files?!
+				echo "Warning: $origname is not a regular file!\n";
 			}
 		}
-		// TODO: Also warn about extra files which are not indexed
+
+		$origname = utf8_normalize(basename($origname));
+		$files_checked[] = dirname($file) . '/' . $origname;
+	}
+
+	// Now check if files have vanished!
+	$directory = dirname($file);
+	$sd = @scandir($directory);
+	if ($sd === false) {
+		echo "Error: Cannot scan directory $directory\n";
+	} else {
+		foreach ($sd as $file) {
+			if ($file === '.') continue;
+			if ($file === '..') continue;
+			if (strtolower($file) === 'thumbs.db') continue;
+			if (strtolower(substr($file, -4)) === '.md5') continue;
+			if (strtolower(substr($file, -4)) === '.sfv') continue;
+			$fullpath = $directory . '/' . $file;
+			if (!is_dir($fullpath)) {
+				$fullpath = utf8_normalize($fullpath);
+				if (!in_array($fullpath,$files_checked)) {
+					echo "Warning: File not in SFV checksum file: $fullpath\n";
+				}
+			}
+		}
 	}
 }
 
