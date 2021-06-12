@@ -9,6 +9,8 @@ interface
 
 procedure MyAssignFile(var hFile: THandle; filename: string);
 procedure MyReset(hFile: THandle);
+procedure MyRewrite(hFile: THandle);
+procedure MyWriteLn(hFile: THandle; s: AnsiString);
 procedure MyReadLn(hFile: THandle; var s: string);
 procedure MyCloseFile(hFile: THandle);
 function MyEOF(hFile: THandle): boolean;
@@ -21,13 +23,36 @@ uses
 
 procedure MyAssignFile(var hFile: THandle; filename: string);
 begin
-  hFile := CreateFile(PChar(filename), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, 0);
-  if hFile = INVALID_HANDLE_VALUE then RaiseLastOSError;
+  hFile := CreateFile(PChar(filename), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, 0);
+  if hFile = INVALID_HANDLE_VALUE then
+  begin
+    if GetLastError = ERROR_ACCESS_DENIED then
+    begin
+      hFile := CreateFile(PChar(filename), GENERIC_READ, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, 0);
+      if hFile = INVALID_HANDLE_VALUE then RaiseLastOSError;
+    end
+    else RaiseLastOSError;
+  end;
 end;
 
 procedure MyReset(hFile: THandle);
 begin
   SetFilePointer(hFile, 0, nil, FILE_BEGIN);
+end;
+
+procedure MyRewrite(hFile: THandle);
+begin
+  SetFilePointer(hFile, 0, nil, FILE_BEGIN);
+  SetEndOfFile(hFile);
+end;
+
+procedure MyWriteLn(hFile: THandle; s: AnsiString);
+var
+  numWritten: Cardinal;
+begin
+  s := s + #13#10;
+  WriteFile(hFile, s[1], Length(s), numWritten, nil);
+  if Cardinal(Length(s)) <> numWritten then RaiseLastOSError;
 end;
 
 procedure MyReadLn(hFile: THandle; var s: string);

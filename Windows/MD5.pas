@@ -3,7 +3,18 @@ unit MD5;
 interface
 
 uses
-  Classes;
+  Classes, Common;
+
+type
+  TCheckSumFileMD5 = class(TCheckSumFile)
+  protected
+    Fmd5File: string;
+  public
+    constructor Create(AFileName: string); override;
+    procedure ToStringList(slOut: TStringList); override;
+    function SingleFileChecksum(AFileName: string): string; override;
+    function MergeLine(AFileName, ACheckSum: string): string; override;
+  end;
 
 function md5file(const filename: string): string;
 procedure MD5FileToStringList(amd5file: string; slOut: TStringList);
@@ -11,7 +22,7 @@ procedure MD5FileToStringList(amd5file: string; slOut: TStringList);
 implementation
 
 uses
-  SysUtils, IdHashMessageDigest, idHash, Common, LongFilenameOperations;
+  SysUtils, IdHashMessageDigest, idHash, LongFilenameOperations;
 
 function md5file(const filename: string): string;
 var
@@ -88,6 +99,32 @@ begin
   finally
     MyCloseFile(fil);
   end;
+end;
+
+{ TCheckSumFileMD5 }
+
+constructor TCheckSumFileMD5.Create(AFileName: string);
+begin
+  inherited;
+  fmd5File := AFileName;
+  if not SameText(ExtractFileExt(AFileName),'.sfv') then
+    raise Exception.Create('Invalid checksum file extension.');
+end;
+
+function TCheckSumFileMD5.MergeLine(AFileName, ACheckSum: string): string;
+begin
+  result := ACheckSum + ' *' + AFileName;
+end;
+
+function TCheckSumFileMD5.SingleFileChecksum(AFileName: string): string;
+begin
+  result := md5file(AFileName);
+end;
+
+procedure TCheckSumFileMD5.ToStringList(slOut: TStringList);
+begin
+  inherited;
+  MD5FileToStringList(fmd5File, slOut);
 end;
 
 end.

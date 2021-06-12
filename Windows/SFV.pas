@@ -3,7 +3,18 @@ unit SFV;
 interface
 
 uses
-  Classes;
+  Classes, Common;
+
+type
+  TCheckSumFileSFV = class(TCheckSumFile)
+  protected
+    sfvFile: string;
+  public
+    constructor Create(AFileName: string); override;
+    procedure ToStringList(slOut: TStringList); override;
+    function SingleFileChecksum(AFileName: string): string; override;
+    function MergeLine(AFileName, ACheckSum: string): string; override;
+  end;
 
 function CalcFileCRC32(filename: string): string; overload;
 procedure SFVFileToStringList(aSFVFile: string; slOut: TStringList);
@@ -11,7 +22,7 @@ procedure SFVFileToStringList(aSFVFile: string; slOut: TStringList);
 implementation
 
 uses
-  Windows, SysUtils, CRC32, Common, LongFilenameOperations;
+  Windows, SysUtils, CRC32, LongFilenameOperations;
 
 function CalcFileCRC32(filename: string): string; overload;
 var
@@ -78,6 +89,32 @@ begin
   finally
     MyCloseFile(fil);
   end;
+end;
+
+{ TCheckSumFileSFV }
+
+constructor TCheckSumFileSFV.Create(AFileName: string);
+begin
+  inherited;
+  sfvFile := AFileName;
+  if not SameText(ExtractFileExt(AFileName),'.sfv') then
+    raise Exception.Create('Invalid checksum file extension.');
+end;
+
+function TCheckSumFileSFV.MergeLine(AFileName, ACheckSum: string): string;
+begin
+  result := AFileName + ' ' + ACheckSum;
+end;
+
+function TCheckSumFileSFV.SingleFileChecksum(AFileName: string): string;
+begin
+  result := CalcFileCRC32(AFileName);
+end;
+
+procedure TCheckSumFileSFV.ToStringList(slOut: TStringList);
+begin
+  inherited;
+  SFVFileToStringList(sfvFile, slOut);
 end;
 
 end.
