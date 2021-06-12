@@ -1,8 +1,11 @@
 
-Button to select directory
+File icons: High resolution + add SFV/MD5 into the icon file
 
-Button to convert drive letter (X:\) into long file name UNC path (\\?\)
+Program icons !!!
 
-Pause/Cancel button
+Directory checker:
+- Button to select directory
+- Button to convert drive letter (X:\) into long file name UNC path (\\?\)
+- Pause/Cancel button
 
-*Maybe* in the future a SFV/MD5 generator. However, TotalCommander can do it too.
+Documentation
