@@ -20,6 +20,7 @@ type
     OpenDialog1: TOpenDialog;
     procedure Button1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FChecksumFile: string;
   public
@@ -42,6 +43,11 @@ procedure TForm3.Button1Click(Sender: TObject);
 begin
   SaveSFV;
   LoadSFV;
+end;
+
+procedure TForm3.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #27 then Close;
 end;
 
 procedure TForm3.FormShow(Sender: TObject);
@@ -93,7 +99,7 @@ begin
     csman.ToStringList(slSFV);
 
     // List existing files
-    IsFound := FindFirst(ADirectory + '*', faAnyFile, SR) = 0;
+    IsFound := FindFirst(ADirectory + '*', faAnyFile xor faDirectory, SR) = 0;
     while IsFound do
     begin
       if (SR.Name <> '.') and (SR.Name <> '..') then
@@ -143,6 +149,13 @@ begin
         Memo4.Lines.Add(csman.MergeLine(TestFileName, IstChecksum));
       end;
     end;
+
+    if (Memo2.Text = '') and (Memo3.Text = '') and (Memo4.Text = '') then
+      Color := clMoneyGreen
+    else if (Memo2.Text <> '') then
+      Color := clRed
+    else
+      Color := clYellow;
   finally
     FreeAndNil(slSFV);
     FreeAndNil(existingFiles);
