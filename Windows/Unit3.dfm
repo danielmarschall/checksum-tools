@@ -13,7 +13,7 @@ object Form3: TForm3
   Font.Style = []
   KeyPreview = True
   OldCreateOrder = False
-  OnKeyPress = FormKeyPress
+  OnKeyDown = FormKeyDown
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -104,9 +104,9 @@ object Form3: TForm3
   object Button1: TButton
     Left = 8
     Top = 568
-    Width = 167
+    Width = 209
     Height = 38
-    Caption = 'Merge, save and re-check'
+    Caption = 'Merge, save and re-check (F6)'
     TabOrder = 4
     OnClick = Button1Click
   end
@@ -114,6 +114,13 @@ object Form3: TForm3
     Filter = 'SFV Files (*.sfv)|*.sfv|MD5 files (*.md5)|*.md5'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 560
+    Top = 552
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = Timer1Timer
+    Left = 496
     Top = 552
   end
 end

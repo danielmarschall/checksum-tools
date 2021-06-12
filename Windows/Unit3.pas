@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
 
 type
   TForm3 = class(TForm)
@@ -18,9 +18,11 @@ type
     Label4: TLabel;
     Button1: TButton;
     OpenDialog1: TOpenDialog;
+    Timer1: TTimer;
     procedure Button1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Timer1Timer(Sender: TObject);
   private
     FChecksumFile: string;
   public
@@ -45,15 +47,31 @@ begin
   LoadSFV;
 end;
 
-procedure TForm3.FormKeyPress(Sender: TObject; var Key: Char);
+procedure TForm3.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
-  if Key = #27 then Close;
+  if (Shift = []) and (Key = VK_F6) then
+  begin
+    Key := 0;
+    SaveSFV;
+    LoadSFV;
+  end
+  else if (Shift = []) and (Key = VK_ESCAPE) then
+  begin
+    Key := 0;
+    Close;
+  end
+  else if (Shift = []) and (Key = VK_F5) then
+  begin
+    Key := 0;
+    LoadSFV;
+  end;
 end;
 
 procedure TForm3.FormShow(Sender: TObject);
 begin
   Caption := ParamChecksumFile;
-  LoadSFV;
+  Timer1.Enabled := true;
 end;
 
 procedure TForm3.LoadSFV;
@@ -71,6 +89,9 @@ var
   j: Integer;
   csman: TCheckSumFile;
 begin
+  Color := clGray;
+  Refresh;
+
   FileName := ParamChecksumFile;
   ADirectory := ExtractFilePath(FileName);
 
@@ -104,7 +125,7 @@ begin
     begin
       if (SR.Name <> '.') and (SR.Name <> '..') then
       begin
-        existingFiles.Add(LowerCase(SR.Name));
+        existingFiles.Add(SR.Name);
       end;
       IsFound := FindNext(SR) = 0;
     end;
@@ -121,7 +142,7 @@ begin
       end
       else
       begin
-        IstChecksum  := CalcFileCRC32(TestFilename);
+        IstChecksum  := csman.SingleFileChecksum(TestFilename);
         if SameText(SollChecksum, IstChecksum) then
         begin
           Memo1.Lines.Add(csman.MergeLine(slSFV.Strings[i], SollChecksum));
@@ -132,7 +153,12 @@ begin
           Memo2.Lines.Add(csman.MergeLine(slSFV.Strings[i], SollChecksum));
         end;
 
-        j := existingFiles.IndexOf(LowerCase(slSFV.Strings[i]));
+        {$IFDEF MSWINDOWS}
+        existingFiles.CaseSensitive := false;
+        {$ELSE}
+        existingFiles.CaseSensitive := true;
+        {$ENDIF}
+        j := existingFiles.IndexOf(slSFV.Strings[i]);
         if j >= 0 then existingFiles.Delete(j);
       end;
     end;
@@ -156,6 +182,20 @@ begin
       Color := clRed
     else
       Color := clYellow;
+
+    Memo1.SelStart := 0;
+    Memo1.SelLength := 0;
+    Memo2.SelStart := 0;
+    Memo2.SelLength := 0;
+    Memo3.SelStart := 0;
+    Memo3.SelLength := 0;
+    Memo4.SelStart := 0;
+    Memo4.SelLength := 0;
+
+    if Memo2.Text <> '' then Memo2.SetFocus
+    else if Memo3.Text <> '' then Memo3.SetFocus
+    else if Memo4.Text <> '' then Memo4.SetFocus
+    else Memo1.SetFocus;
   finally
     FreeAndNil(slSFV);
     FreeAndNil(existingFiles);
@@ -189,30 +229,53 @@ procedure TForm3.SaveSFV;
 var
   hFile: THandle;
   i: Integer;
+  slOut: TStringList;
 begin
   MyAssignFile(hFile, ParamChecksumFile);
-  MyRewrite(hFile); // clear File
-  for i := 0 to memo1.Lines.Count-1 do
-  begin
-    if Trim(Memo1.Lines[i]) <> '' then
-      MyWriteLn(hFile, AnsiString(utf8encode(Memo1.Lines[i])));
+  try
+    MyRewrite(hFile); // clear File
+
+    slOut := TStringList.Create;
+    try
+      // Fill slOut with the Memo contents
+      for i := 0 to memo1.Lines.Count-1 do
+      begin
+        slOut.Add(Memo1.Lines[i]);
+      end;
+      for i := 0 to memo2.Lines.Count-1 do
+      begin
+        slOut.Add(Memo2.Lines[i]);
+      end;
+      for i := 0 to memo3.Lines.Count-1 do
+      begin
+        slOut.Add(Memo3.Lines[i]);
+      end;
+      for i := 0 to memo4.Lines.Count-1 do
+      begin
+        slOut.Add(Memo4.Lines[i]);
+      end;
+
+      // Sort
+      slOut.Sort;
+
+      // Write to SFV/MD5 file
+      for i := 0 to slOut.Count-1 do
+      begin
+        if Trim(slOut[i]) <> '' then
+          MyWriteLn(hFile, AnsiString(utf8encode(slOut[i])));
+      end;
+    finally
+      FreeAndNil(slOut);
+    end;
+  finally
+    MyCloseFile(hFile);
   end;
-  for i := 0 to memo2.Lines.Count-1 do
-  begin
-    if Trim(Memo2.Lines[i]) <> '' then
-      MyWriteLn(hFile, AnsiString(utf8encode(Memo2.Lines[i])));
-  end;
-  for i := 0 to memo3.Lines.Count-1 do
-  begin
-    if Trim(Memo3.Lines[i]) <> '' then
-      MyWriteLn(hFile, AnsiString(utf8encode(Memo3.Lines[i])));
-  end;
-  for i := 0 to memo4.Lines.Count-1 do
-  begin
-    if Trim(Memo4.Lines[i]) <> '' then
-      MyWriteLn(hFile, AnsiString(utf8encode(Memo4.Lines[i])));
-  end;
-  MyCloseFile(hFile);
+end;
+
+procedure TForm3.Timer1Timer(Sender: TObject);
+begin
+  Timer1.Enabled := false;
+  LoadSFV;
 end;
 
 end.

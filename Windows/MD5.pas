@@ -107,7 +107,7 @@ constructor TCheckSumFileMD5.Create(AFileName: string);
 begin
   inherited;
   fmd5File := AFileName;
-  if not SameText(ExtractFileExt(AFileName),'.sfv') then
+  if not SameText(ExtractFileExt(AFileName),'.md5') then
     raise Exception.Create('Invalid checksum file extension.');
 end;
 
@@ -118,7 +118,7 @@ end;
 
 function TCheckSumFileMD5.SingleFileChecksum(AFileName: string): string;
 begin
-  result := md5file(AFileName);
+  result := LowerCase(md5file(AFileName));
 end;
 
 procedure TCheckSumFileMD5.ToStringList(slOut: TStringList);
