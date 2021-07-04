@@ -171,7 +171,7 @@ begin
          not SameText(ExtractFileExt(TestFileName), '.md5') and
          not SameText(TestFileName, 'Thumbs.db') then
       begin
-        IstChecksum  := CalcFileCRC32(IncludeTrailingPathDelimiter(ADirectory) + TestFilename);
+        IstChecksum  := csman.SingleFileChecksum(IncludeTrailingPathDelimiter(ADirectory) + TestFilename);
         Memo4.Lines.Add(csman.MergeLine(TestFileName, IstChecksum));
       end;
     end;
