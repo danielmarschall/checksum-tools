@@ -27,7 +27,14 @@ function _rec($directory) {
 		die("Invalid directory path $directory\n");
 	}
 
-	$md5_file = $directory.'/'.basename($directory).'.md5';
+	if ((basename($directory) == '.') || (basename($directory) == '..')) {
+		$md5_file = rtrim($directory,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.
+		            basename(realpath($directory)).'.md5';
+
+	} else {
+		$md5_file = rtrim($directory,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.
+		            basename($directory).'.md5';
+	}
 
 	if (file_exists($md5_file)) {
 		$existing_files = md5_get_files($md5_file);

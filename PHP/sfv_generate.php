@@ -27,7 +27,14 @@ function _rec($directory) {
 		die("Invalid directory path $directory\n");
 	}
 
-	$sfv_file = $directory.'/'.basename($directory).'.sfv';
+	if ((basename($directory) == '.') || (basename($directory) == '..')) {
+		$sfv_file = rtrim($directory,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.
+		            basename(realpath($directory)).'.sfv';
+
+	} else {
+		$sfv_file = rtrim($directory,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.
+		            basename($directory).'.sfv';
+	}
 
 	if (file_exists($sfv_file)) {
 		$existing_files = sfv_get_files($sfv_file);
