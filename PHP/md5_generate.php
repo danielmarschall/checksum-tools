@@ -2,7 +2,7 @@
 <?php
 
 /*
-   Copyright 2020 Daniel Marschall, ViaThinkSoft
+   Copyright 2020-2021 Daniel Marschall, ViaThinkSoft
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ function _rec($directory) {
 		if (strtolower(substr($file, -4)) === '.md5') continue;
 		if (strtolower(substr($file, -4)) === '.sfv') continue;
 
-		$fullpath = $directory . '/' . $file;
+		$fullpath = rtrim($directory,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$file;
 		if (is_dir($fullpath)) {
 			_rec($fullpath);
 		} else if (is_file($fullpath)) {
