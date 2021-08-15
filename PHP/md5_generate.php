@@ -57,7 +57,8 @@ function _rec($directory) {
 
 		$fullpath = rtrim($directory,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$file;
 		if (is_dir($fullpath)) {
-			_rec($fullpath);
+			global $do_recursive;
+			if ($do_recursive) _rec($fullpath);
 		} else if (is_file($fullpath)) {
 			global $show_verbose;
 			if ($show_verbose) echo "$fullpath\n";
@@ -99,18 +100,21 @@ function md5_get_files($filename) {
 # ---
 
 $show_verbose = false;
+$do_recursive = false;
 $dir = '';
 
 for ($i=1; $i<$argc; $i++) {
 	if ($argv[$i] == '-v') {
 		$show_verbose = true;
+	} else if ($argv[$i] == '-r') {
+		$do_recursive = true;
 	} else {
 		$dir = $argv[$i];
 	}
 }
 
 if (empty($dir)) {
-	echo "Syntax: $argv[0] [-v] <directory>\n";
+	echo "Syntax: $argv[0] [-v] [-r] <directory>\n";
 	exit(2);
 }
 
