@@ -43,6 +43,8 @@ function testmd5($file) {
 		return;
 	}
 
+	$files_checked = array();
+
 	$lines = file($file);
 	$is_first_line = true;
 	$force_utf8 = false;

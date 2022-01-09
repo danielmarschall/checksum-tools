@@ -1,0 +1,11 @@
+parameters:
+	level: 5
+	fileExtensions:
+		- php
+		- phps
+	paths:
+		- .
+	excludePaths:
+		analyseAndScan:
+			- .phpstan.tmp
+	tmpDir: .phpstan.tmp
