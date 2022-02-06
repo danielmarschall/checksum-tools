@@ -2,7 +2,7 @@
 <?php
 
 /*
-   Copyright 2020 Daniel Marschall, ViaThinkSoft
+   Copyright 2020-2022 Daniel Marschall, ViaThinkSoft
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
    limitations under the License.
 */
 
-// TODO: make use of STDERR and return different exit codes
 // TODO: On Windows file systems, accept file names case insensitively
 
 function utf8_normalize($str) {
@@ -39,7 +38,7 @@ function convertToUTF8($str) {
 function testmd5($file) {
 	// TODO: warn if an entry is multiple times (with different checksums) in a single file
 	if (!file_exists($file)) {
-		echo "ERROR: File $file does not exist.\n";
+		fwrite(STDERR, "ERROR: File $file does not exist.\n");
 		return;
 	}
 
@@ -67,19 +66,19 @@ function testmd5($file) {
 		$origname = dirname($file) . '/' . trim($origname);
 		$checksum = trim($checksum);
 		if (!file_exists($origname)) {
-			echo "WARNING: File vanished : $origname\n";
+			fwrite(STDERR, "WARNING: File vanished : $origname\n");
 		} else {
 			if (is_file($origname)) {
 				$checksum2 = md5_file($origname);
 				if (strtolower($checksum) != strtolower($checksum2)) {
-					echo "CHECKSUM FAIL: $origname (expected $checksum, but is $checksum2)\n";
+					fwrite(STDERR, "CHECKSUM FAIL: $origname (expected $checksum, but is $checksum2)\n");
 				} else {
 					global $show_verbose;
 					if ($show_verbose) echo "OK: $origname\n";
 				}
 			} else {
 				// For some reason, some files on a NTFS volume are "FIFO" pipe files?!
-				echo "Warning: $origname is not a regular file!\n";
+				fwrite(STDERR, "Warning: $origname is not a regular file!\n");
 			}
 		}
 
@@ -91,11 +90,12 @@ function testmd5($file) {
 	$directory = dirname($file);
 	$sd = @scandir($directory);
 	if ($sd === false) {
-		echo "Error: Cannot scan directory $directory\n";
+		fwrite(STDERR, "Error: Cannot scan directory $directory\n");
 	} else {
 		foreach ($sd as $file) {
 			if ($file === '.') continue;
 			if ($file === '..') continue;
+			if (substr($file,0,1) === '.') continue;
 			if (strtolower($file) === 'thumbs.db') continue;
 			if (strtolower(substr($file, -4)) === '.md5') continue;
 			if (strtolower(substr($file, -4)) === '.sfv') continue;
@@ -103,7 +103,7 @@ function testmd5($file) {
 			if (!is_dir($fullpath)) {
 				$fullpath = utf8_normalize($fullpath);
 				if (!in_array($fullpath,$files_checked)) {
-					echo "Warning: File not in SFV checksum file: $fullpath\n";
+					fwrite(STDERR, "Warning: File not in SFV checksum file: $fullpath\n");
 				}
 			}
 		}
@@ -114,7 +114,8 @@ function _rec($directory) {
 	$directory = rtrim($directory, '/\\');
 
 	if (!is_dir($directory)) {
-		exit("Invalid directory path $directory\n");
+		fwrite(STDERR, "Invalid directory path $directory\n");
+		return false;
 	}
 
 	if ($dont_add_files = count(glob("$directory/*.md5")) == 0) {
@@ -133,8 +134,8 @@ function _rec($directory) {
 
 	$sd = @scandir($directory);
 	if ($sd === false) {
-		echo "Error: Cannot scan directory $directory\n";
-		return;
+		fwrite(STDERR, "Error: Cannot scan directory $directory\n");
+		return false;
 	}
 
 	foreach ($sd as $file) {
@@ -145,32 +146,33 @@ function _rec($directory) {
 			}
 		}
 	}
+
+	return true;
 }
 
 
 # ---
 
 $show_verbose = false;
-$dir = '';
+$dirs = array();
 
 for ($i=1; $i<$argc; $i++) {
 	if ($argv[$i] == '-v') {
 		$show_verbose = true;
 	} else {
-		$dir = $argv[$i];
+		$dirs[] = $argv[$i];
 	}
 }
 
-if (empty($dir)) {
-	echo "Syntax: $argv[0] [-v] <directory>\n";
+if (count($dirs) == 0) {
+	echo "Syntax: $argv[0] [-v] <directory> [<directory> [...]]\n";
 	exit(2);
 }
 
-if (!is_dir($dir)) {
-	echo "Directory not found\n";
-	exit(1);
+$res = 0;
+foreach ($dirs as $dir) {
+	if (!_rec($dir)) $res = 1;
 }
-
-_rec($dir);
-
 if ($show_verbose) echo "Done.\n";
+exit($res);
+

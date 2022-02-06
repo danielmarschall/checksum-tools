@@ -2,7 +2,7 @@
 <?php
 
 /*
-   Copyright 2020-2021 Daniel Marschall, ViaThinkSoft
+   Copyright 2020-2022 Daniel Marschall, ViaThinkSoft
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@
 // This script generates SFV files
 // If there is already an SFV file existing, only new files get appended to the existing SFV files.
 
-// TODO: make use of STDERR and return different exit codes
-
 function _rec($directory) {
 	if (!is_dir($directory)) {
-		die("Invalid directory path $directory\n");
+		fwrite(STDERR, "Invalid directory path '$directory'\n");
+		return false;
 	}
 
 	if ((basename($directory) == '.') || (basename($directory) == '..')) {
@@ -44,13 +43,14 @@ function _rec($directory) {
 
 	$sd = @scandir($directory);
 	if ($sd === false) {
-		echo "Error: Cannot scan directory $directory\n";
-		return;
+		fwrite(STDERR, "Error: Cannot scan directory $directory\n");
+		return false;
 	}
 
 	foreach ($sd as $file) {
 		if ($file === '.') continue;
 		if ($file === '..') continue;
+		if (substr($file,0,1) === '.') continue;
 		if (strtolower($file) === 'thumbs.db') continue;
 		if (strtolower(substr($file, -4)) === '.md5') continue;
 		if (strtolower(substr($file, -4)) === '.sfv') continue;
@@ -74,9 +74,11 @@ function _rec($directory) {
 			}
 		} else {
 			// For some reason, some files on a NTFS volume are "FIFO" pipe files?!
-			echo "Warning: $fullpath is not a regular file!\n";
+			fwrite(STDERR, "Warning: $fullpath is not a regular file!\n");
 		}
 	}
+
+	return true;
 }
 
 function sfv_get_files($filename) {
@@ -110,7 +112,7 @@ function crc32_file($filename, $rawOutput = false) {
 
 $show_verbose = false;
 $do_recursive = false;
-$dir = '';
+$dirs = array();
 
 for ($i=1; $i<$argc; $i++) {
 	if ($argv[$i] == '-v') {
@@ -118,20 +120,18 @@ for ($i=1; $i<$argc; $i++) {
 	} else if ($argv[$i] == '-r') {
 		$do_recursive = true;
 	} else {
-		$dir = $argv[$i];
+		$dirs[] = $argv[$i];
 	}
 }
 
-if (empty($dir)) {
-	echo "Syntax: $argv[0] [-v] [-r] <directory>\n";
+if (count($dirs) == 0) {
+	echo "Syntax: $argv[0] [-v] [-r] <directory> [<directory> [...]]\n";
 	exit(2);
 }
 
-if (!is_dir($dir)) {
-	echo "Directory not found\n";
-	exit(1);
+$res = 0;
+foreach ($dirs as $dir) {
+	if (!_rec($dir)) $res = 1;
 }
-
-_rec($dir);
-
 if ($show_verbose) echo "Done.\n";
+exit($res);
