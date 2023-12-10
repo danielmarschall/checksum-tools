@@ -6,6 +6,7 @@ Program icons !!!
 Directory checker:
 - Button to select directory
 - Button to convert drive letter (X:\) into long file name UNC path (\\?\)
+	==> Not required. It is done automatically internally.
 - Pause/Cancel button
 
 Documentation

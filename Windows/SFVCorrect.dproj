@@ -86,7 +86,6 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=ViaThinkSoft;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=(C) 2021 Daniel Marschall, ViaThinkSoft;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <Debugger_RunParams>&quot;d:\OneDrive\Fandom\Bilder nach Artisten\Spelunker Sal (Patreon)\05-2023 SpelunkerSal - Fox Rocket Thunder\05-2023 SpelunkerSal - Fox Rocket Thunder - Desktop 6k &amp; 4k - Horizontal\standard sizes horizontal\standard sizes horizontal.sfv&quot;</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
