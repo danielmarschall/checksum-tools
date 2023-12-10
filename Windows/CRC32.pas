@@ -201,9 +201,13 @@ IMPLEMENTATION
       CRCValue := $FFFFFFFF;
       if Length(FromName) >= MAX_PATH then
       begin
-        MyASSIGNFile (FromFile2,FromName);
-        MyRESET (FromFile2);
-        error := GetLastError;
+        try
+          MyASSIGNFile (FromFile2,FromName);
+          MyRESET (FromFile2);
+          error := GetLastError;
+        except
+          error := 1;
+        end;
       end
       else
       begin

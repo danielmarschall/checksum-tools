@@ -21,7 +21,7 @@ object Form1: TForm1
     Left = 8
     Top = 571
     Width = 958
-    Height = 42
+    Height = 26
     Anchors = [akLeft, akRight, akBottom]
     Caption = 
       'Hints: MD5/SFV files can be created by TotalCommander or other t' +
@@ -51,7 +51,6 @@ object Form1: TForm1
     ReadOnly = True
     ScrollBars = ssBoth
     TabOrder = 1
-    ExplicitHeight = 376
   end
   object cbVerbose: TCheckBox
     Left = 8

@@ -93,6 +93,7 @@ begin
   Refresh;
 
   FileName := ParamChecksumFile;
+  if Copy(FileName, 2, 1) = ':' then FileName := '\\?\' + FileName; // To allow long filenames
   ADirectory := ExtractFilePath(FileName);
 
   if not FileExists(FileName) then

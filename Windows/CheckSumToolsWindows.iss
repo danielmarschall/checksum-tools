@@ -4,9 +4,9 @@
 
 [Setup]
 AppName=ViaThinkSoft Checksum Tools
-AppVerName=ViaThinkSoft Checksum Tools 1.0
-AppVersion=1.0
-AppCopyright=© Copyright 2021 ViaThinkSoft.
+AppVerName=ViaThinkSoft Checksum Tools 1.1
+AppVersion=1.1
+AppCopyright=© Copyright 2017 - 2023 ViaThinkSoft.
 AppPublisher=ViaThinkSoft
 AppPublisherURL=http://www.viathinksoft.com/
 AppSupportURL=http://www.daniel-marschall.de/
@@ -14,10 +14,10 @@ AppUpdatesURL=http://www.viathinksoft.com/
 DefaultDirName={commonpf}\ViaThinkSoft Checksum Tools
 DefaultGroupName=Checksum Tools
 VersionInfoCompany=ViaThinkSoft
-VersionInfoCopyright=© Copyright 2017 - 2021 ViaThinkSoft.
+VersionInfoCopyright=© Copyright 2017 - 2023 ViaThinkSoft.
 VersionInfoDescription=Checksum Tools Setup
-VersionInfoTextVersion=1.0.0.1
-VersionInfoVersion=1.0
+VersionInfoTextVersion=1.1.0.0
+VersionInfoVersion=1.1
 Compression=zip/9
 ChangesAssociations=yes
 OutputBaseFilename=ChecksumTools

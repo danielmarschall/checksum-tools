@@ -22,16 +22,20 @@ uses
   Windows, SysUtils;
 
 procedure MyAssignFile(var hFile: THandle; filename: string);
+var
+  lastErr: DWORD;
 begin
+  if Copy(filename, 2, 1) = ':' then filename := '\\?\' + filename; // To allow long filenames
   hFile := CreateFile(PChar(filename), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, 0);
   if hFile = INVALID_HANDLE_VALUE then
   begin
-    if GetLastError = ERROR_ACCESS_DENIED then
+    lastErr := GetLastError;
+    if lastErr = ERROR_ACCESS_DENIED then
     begin
       hFile := CreateFile(PChar(filename), GENERIC_READ, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, 0);
       if hFile = INVALID_HANDLE_VALUE then RaiseLastOSError;
     end
-    else RaiseLastOSError;
+    else RaiseLastOSError(lastErr);
   end;
 end;
 

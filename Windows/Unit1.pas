@@ -88,6 +88,8 @@ var
   ADirectory: string;
   originalFilenameFull: string;
 begin
+  if Copy(aChecksumFile, 2, 1) = ':' then aChecksumFile := '\\?\' + aChecksumFile; // To allow long filenames
+
   if ExtractFileName(aChecksumFile) <> DUMMY_FILE then
   begin
     Inc(CheckSumFileCount);
@@ -95,7 +97,7 @@ begin
 
   if cbVerbose.Checked then
   begin
-    Form1.Memo1.Lines.Add('Check: ' + aChecksumFile);
+    Form1.Memo1.Lines.Add('Check: ' + StringReplace(aChecksumFile,'\\?\','',[]));
   end;
 
   Result := seOK;
@@ -121,12 +123,11 @@ begin
         expectedChecksum := TChecksum(slFile.Objects[i]).checksum;
 
         originalFilenameFull := ADirectory + originalFilename;
-
         if not FileExists(originalFilenameFull) then
         begin
           if cbWarnVanishedFile.Checked then
           begin
-            Form1.Memo1.Lines.Add('FILE VANISHED: ' + originalFilenameFull);
+            Form1.Memo1.Lines.Add('FILE VANISHED: ' + StringReplace(originalFilenameFull,'\\?\','',[]));
             Result := SevMax(Result, seCritical);
           end;
         end
@@ -135,7 +136,7 @@ begin
         begin
           if cbVerbose.Checked then
           begin
-            Form1.Memo1.Lines.Add('OK: ' + originalFilenameFull + ' = ' +
+            Form1.Memo1.Lines.Add('OK: ' + StringReplace(originalFilenameFull,'\\?\','',[]) + ' = ' +
               expectedChecksum);
           end;
           Result := SevMax(Result, seOK);
@@ -144,7 +145,7 @@ begin
         begin
           if cbWarnChecksumMismatch.Checked then
           begin
-            Form1.Memo1.Lines.Add('CHECKSUM MISMATCH: ' + originalFilenameFull +
+            Form1.Memo1.Lines.Add('CHECKSUM MISMATCH: ' + StringReplace(originalFilenameFull,'\\?\','',[]) +
               ' <> ' + expectedChecksum);
             Result := SevMax(Result, seCritical);
           end;
@@ -168,7 +169,7 @@ begin
               if cbWarnChecksumFileMissing.Checked then
               begin
                 Form1.Memo1.Lines.Add('NEW FILE WITHOUT CHECKSUM FILE: ' +
-                  fullfilename);
+                  StringReplace(fullfilename,'\\?\','',[]));
                 Result := SevMax(Result, seWarning);
               end;
             end
@@ -177,7 +178,7 @@ begin
               if cbWarningMissingChecksumFileEntry.Checked then
               begin
                 Form1.Memo1.Lines.Add('NEW FILE WITHOUT CHECKSUM ENTRY: ' +
-                  fullfilename);
+                  StringReplace(fullfilename,'\\?\','',[]));
                 Result := SevMax(Result, seWarning);
               end;
             end;
