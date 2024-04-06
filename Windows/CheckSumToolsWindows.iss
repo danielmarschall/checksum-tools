@@ -6,7 +6,7 @@
 AppName=ViaThinkSoft Checksum Tools
 AppVerName=ViaThinkSoft Checksum Tools 1.1
 AppVersion=1.1
-AppCopyright=© Copyright 2017 - 2023 ViaThinkSoft.
+AppCopyright=© Copyright 2017 - 2024 ViaThinkSoft.
 AppPublisher=ViaThinkSoft
 AppPublisherURL=http://www.viathinksoft.com/
 AppSupportURL=http://www.daniel-marschall.de/
@@ -14,7 +14,7 @@ AppUpdatesURL=http://www.viathinksoft.com/
 DefaultDirName={commonpf}\ViaThinkSoft Checksum Tools
 DefaultGroupName=Checksum Tools
 VersionInfoCompany=ViaThinkSoft
-VersionInfoCopyright=© Copyright 2017 - 2023 ViaThinkSoft.
+VersionInfoCopyright=© Copyright 2017 - 2024 ViaThinkSoft.
 VersionInfoDescription=Checksum Tools Setup
 VersionInfoTextVersion=1.1.0.0
 VersionInfoVersion=1.1
@@ -22,6 +22,11 @@ Compression=zip/9
 ChangesAssociations=yes
 OutputBaseFilename=ChecksumTools
 LicenseFile=..\LICENSE
+; Configure Sign Tool in InnoSetup at "Tools => Configure Sign Tools" (adjust the path to your SVN repository location)
+; Name    = sign_single   
+; Command = "C:\SVN\...\sign_single.bat" $f
+SignTool=sign_single
+SignedUninstaller=yes
 
 [CustomMessages]
 Assoc=File associations:
@@ -42,8 +47,8 @@ Name: fileassocSFV;  Description: "{cm:AssocFileExtension,'SFV Checksum File','.
 Name: fileassocMD5;  Description: "{cm:AssocFileExtension,'MD5 Checksum File','.md5'}"; GroupDescription: "{cm:Assoc}"; Components: editor
 
 [Files]
-Source: "MD5DirCheck.exe";        DestDir: "{app}"; Flags: ignoreversion; Components: dirchecker
-Source: "SFVCorrect.exe";         DestDir: "{app}"; Flags: ignoreversion; Components: editor
+Source: "MD5DirCheck.exe";        DestDir: "{app}"; Flags: ignoreversion signonce; Components: dirchecker
+Source: "SFVCorrect.exe";         DestDir: "{app}"; Flags: ignoreversion signonce; Components: editor
 Source: "ChecksumFileIcon.ico";   DestDir: "{app}"; Flags: ignoreversion; Components: editor
 
 [Dirs]
