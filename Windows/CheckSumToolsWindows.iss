@@ -1,6 +1,5 @@
 ; ViaThinkSoft Checksum Tools Setup Script for InnoSetup
 ; by Daniel Marschall, ViaThinkSoft
-; http://www.viathinksoft.com/
 
 [Setup]
 AppName=ViaThinkSoft Checksum Tools
@@ -8,9 +7,9 @@ AppVerName=ViaThinkSoft Checksum Tools 1.1
 AppVersion=1.1
 AppCopyright=© Copyright 2017 - 2024 ViaThinkSoft
 AppPublisher=ViaThinkSoft
-AppPublisherURL=http://www.viathinksoft.com/
-AppSupportURL=http://www.daniel-marschall.de/
-AppUpdatesURL=http://www.viathinksoft.com/
+AppPublisherURL=https://www.viathinksoft.com/
+AppSupportURL=https://www.daniel-marschall.de/
+AppUpdatesURL=https://www.viathinksoft.com/
 DefaultDirName={autopf}\ViaThinkSoft Checksum Tools
 DefaultGroupName=Checksum Tools
 VersionInfoCompany=ViaThinkSoft
