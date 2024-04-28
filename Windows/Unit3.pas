@@ -100,6 +100,7 @@ begin
   begin
     ShowMessageFmt('File not found: %s', [FileName]);
     Close;
+    exit;
   end;
 
   Memo1.Clear;
