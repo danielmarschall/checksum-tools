@@ -10,10 +10,10 @@ This project contains two things:
 * Windows Directory: Contains two tools, where you can recursively check if files have been modified (or corrupted by a file system error) by checking all directories containing "MD5" and "SFV" files recursively.
 
 ## Windows tools
-[Download Setup here](https://www.viathinksoft.de/download/246/checksum_tools_setup.exe)
+[Download Setup here](https://www.viathinksoft.de/download/246/checksum_tools_setup.exe) for Windows 32 and 64 bit
 
 ### Windows tool: Checksum generate/verify/update
-![Checksum generate/verify/update screenshot](https://www.viathinksoft.com/screenshot/55/SFV-MD5+Checksum+file+editor.png)
+![Checksum generate/verify/update screenshot](Screenshot1.png)
 
 ### Windows tool: Batch checksum verifier
-![Batch checksum verifier screenshot](https://www.viathinksoft.com/screenshot/53/Windows+checksum+verifier.png)
+![Batch checksum verifier screenshot](Screenshot2.png)

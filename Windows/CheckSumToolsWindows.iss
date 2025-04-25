@@ -3,9 +3,9 @@
 
 [Setup]
 AppName=ViaThinkSoft Checksum Tools
-AppVerName=ViaThinkSoft Checksum Tools 1.1
-AppVersion=1.1
-AppCopyright=© Copyright 2017 - 2024 ViaThinkSoft
+AppVerName=ViaThinkSoft Checksum Tools 1.2
+AppVersion=1.2
+AppCopyright=© Copyright 2017 - 2025 ViaThinkSoft
 AppPublisher=ViaThinkSoft
 AppPublisherURL=https://www.viathinksoft.com/
 AppSupportURL=https://www.daniel-marschall.de/
@@ -13,10 +13,10 @@ AppUpdatesURL=https://www.viathinksoft.com/
 DefaultDirName={autopf}\ViaThinkSoft Checksum Tools
 DefaultGroupName=Checksum Tools
 VersionInfoCompany=ViaThinkSoft
-VersionInfoCopyright=© Copyright 2017 - 2024 ViaThinkSoft
+VersionInfoCopyright=© Copyright 2017 - 2025 ViaThinkSoft
 VersionInfoDescription=Checksum Tools Setup
-VersionInfoTextVersion=1.1.0.0
-VersionInfoVersion=1.1
+VersionInfoTextVersion=1.2.0.0
+VersionInfoVersion=1.2
 ChangesAssociations=yes
 OutputDir=.
 OutputBaseFilename=ChecksumToolsSetup
@@ -26,6 +26,8 @@ LicenseFile=..\LICENSE
 ; Command = "C:\SVN\...\sign_single.bat" $f
 SignTool=sign_single
 SignedUninstaller=yes
+ArchitecturesAllowed=x86compatible x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
 
 [CustomMessages]
 Assoc=File associations:
@@ -46,8 +48,10 @@ Name: fileassocSFV;  Description: "{cm:AssocFileExtension,'SFV Checksum File','.
 Name: fileassocMD5;  Description: "{cm:AssocFileExtension,'MD5 Checksum File','.md5'}"; GroupDescription: "{cm:Assoc}"; Components: editor
 
 [Files]
-Source: "MD5DirCheck.exe";        DestDir: "{app}"; Flags: ignoreversion signonce; Components: dirchecker
-Source: "SFVCorrect.exe";         DestDir: "{app}"; Flags: ignoreversion signonce; Components: editor
+Source: "win32\MD5DirCheck.exe";  DestDir: "{app}"; Flags: ignoreversion signonce; Components: dirchecker; Check: not Is64BitInstallMode
+Source: "win32\SFVCorrect.exe";   DestDir: "{app}"; Flags: ignoreversion signonce; Components: editor; Check: not Is64BitInstallMode
+Source: "win64\MD5DirCheck.exe";  DestDir: "{app}"; Flags: ignoreversion signonce; Components: dirchecker; Check: Is64BitInstallMode
+Source: "win64\SFVCorrect.exe";   DestDir: "{app}"; Flags: ignoreversion signonce; Components: editor; Check: Is64BitInstallMode
 Source: "ChecksumFileIcon.ico";   DestDir: "{app}"; Flags: ignoreversion; Components: editor
 
 [Dirs]
